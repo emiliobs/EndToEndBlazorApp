@@ -29,5 +29,18 @@ namespace EndToEndBlazor.Data
 
         }
 
+        public Task<WeatherForecast> createForescastAsync(WeatherForecast objWeatherForecast)
+        {
+            using (var context = new EndtoendblazorContext())
+            {
+                context.WeatherForecast.Add(objWeatherForecast);
+                context.SaveChanges();
+            }
+
+            return Task.FromResult(objWeatherForecast);
+        }
+
+
     }
+
 }

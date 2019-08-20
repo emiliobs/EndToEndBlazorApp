@@ -6,7 +6,7 @@
 
 @inject WeatherForecastService ForecastService
 
-<h1>Weather forecast</h1>
+<h1>Weather Forecast</h1>
 <!-- AuthorizeView allow us to only show section of the page-->
 <!-- Based on the security on the current user-->
 
@@ -15,6 +15,7 @@
     <Authorized>
 
         <h4>Hello, @context.User.Identity.Name!</h4>
+        <hr />
 
 
         @if (forecasts == null)
@@ -25,23 +26,28 @@
         else
         {
             <!-- show the forescast for the current user. -->
-            <table class="table-hover">
+            <table class="table table-hover">
                 <thead style="background-color:black; color:white;">
                     <tr>
                         <th>Date</th>
                         <th>Temp. (C)</th>
                         <th>Temp. (F)</th>
                         <th>Summary</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var forecast in forecasts)
                     {
                         <tr>
-                            <td>@forecast.Date.Value.ToShortDateString()</td>
-                            <td>@forecast.TemperatureC</td>
-                            <td>@forecast.TemperatureF</td>
+                            <td>@forecast.Date.Value.ToShortDateString()</td> 
+                            <td>@forecast.TemperatureC</td> 
+                            <td>@forecast.TemperatureF</td> 
                             <td>@forecast.Summary</td>
+                            <td>
+                                <button class="btn btn-info">Edit</button> |
+                                <button class="btn btn-danger">Delete</button>
+                            </td>
                         </tr>
                     }
                 </tbody>
@@ -55,13 +61,51 @@
 
 </AuthorizeView>
 
+<hr />
+<p>
+    <!--Add a new forescast-->
+    <button class="btn btn-primary" @onclick="@AddNewForescast">Add New Forescast.</button>
+</p>
+
+@if (ShowPopup)
+{
+    <!--This is the popup to create or edit a forevast-->
+    <div class="modal" tabindex="-1" style="display:block;" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Edit Forescast.</h3>
+                    <!--Button to close the popup-->
+                    <button type="button" class="close" @onclick="@ClosePopup">
+                        <span aria-hidden="true">X</span>
+                    </button>
+                </div>
+                <!--Edit form for the current the forescast-->
+                <div class="modal-body">
+                    <input class="form-control" type="text" placeholder="Celsius forescast" @bind="weatherForecast.TemperatureC" />
+                    <input  class="form-control" type="text" placeholder="Fahrenheit forescast" @bind="weatherForecast.TemperatureF"/>
+                    <input  class="form-control" type="text" placeholder="Summary" @bind="weatherForecast.Summary"/>
+                <br />
+                <!--Button to save the forescast-->
+                <button class="btn btn-primary" @onclick="SaveForescast">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
+
+    
+    WeatherForecast weatherForecast = new WeatherForecast();
     //AuthenticationState is available as a CascadingParameter
     [CascadingParameter]
-    private Task<AuthenticationState>  AuthenticationStateTask { get; set; }
-
+    private Task<AuthenticationState> AuthenticationStateTask { get; set; }
     List<WeatherForecast> forecasts;
-          
+
+    bool ShowPopup = false;
+
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -70,5 +114,54 @@
         //Get the forescasts for the current user
 
         forecasts = await ForescastService.GetForecastAsync(user.Identity.Name);
+    }
+
+    void ClosePopup()
+    {
+        //close the popup
+        ShowPopup = false;
+    }
+
+    void AddNewForescast()
+    {
+        //Make ew forescast:
+        weatherForecast = new WeatherForecast();
+        //set id to 0 so we know it is a new record:
+        weatherForecast.Id = 0;
+        //Open the Popup:
+        ShowPopup = true;
+    }
+
+    async Task SaveForescast()
+    {
+
+        //Close the popup
+        ShowPopup = false;
+        //Get the current users
+        var user = (await AuthenticationStateTask).User;
+        //A new forescast will have the Id set yo  0
+        if (weatherForecast.Id == 0)
+        {
+        
+            WeatherForecast newWeatherForecast = new WeatherForecast();
+
+            //Create new forescast:
+            newWeatherForecast.Date = DateTime.Now.ToUniversalTime();
+            newWeatherForecast.Summary = weatherForecast.Summary;
+            newWeatherForecast.TemperatureC = Convert.ToInt32(weatherForecast.TemperatureC);
+            newWeatherForecast.TemperatureF = Convert.ToInt32(weatherForecast.TemperatureF);
+            newWeatherForecast.UserName = user.Identity.Name;
+
+            //Save the resul:
+            var result = ForescastService.createForescastAsync(newWeatherForecast);
+
+        }
+        else
+        {
+            //This update:
+        }
+
+        forecasts = await ForescastService.GetForecastAsync(user.Identity.Name);
+
     }
 }
