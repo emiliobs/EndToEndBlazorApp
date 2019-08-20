@@ -1,46 +1,74 @@
 ﻿@page "/fetchdata"
-
 @using EndToEndBlazor.Data
+@inject WeatherForecastService  ForescastService
+@inject AuthenticationStateProvider  AuthenticationStateProvider
+
+
 @inject WeatherForecastService ForecastService
 
 <h1>Weather forecast</h1>
+<!-- AuthorizeView allow us to only show section of the page-->
+<!-- Based on the security on the current user-->
 
-<p>This component demonstrates fetching data from a service.</p>
+<AuthorizeView>
 
-@if (forecasts == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var forecast in forecasts)
-            {
-                <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+    <Authorized>
+
+        <h4>Hello, @context.User.Identity.Name!</h4>
+
+
+        @if (forecasts == null)
+        {
+            <!--Show this if the current user has no data..... yet.....-->
+            <p><em>Loading.....</em></p>
+        }
+        else
+        {
+            <!-- show the forescast for the current user. -->
+            <table class="table-hover">
+                <thead style="background-color:black; color:white;">
+                    <tr>
+                        <th>Date</th>
+                        <th>Temp. (C)</th>
+                        <th>Temp. (F)</th>
+                        <th>Summary</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var forecast in forecasts)
+                    {
+                        <tr>
+                            <td>@forecast.Date.Value.ToShortDateString()</td>
+                            <td>@forecast.TemperatureC</td>
+                            <td>@forecast.TemperatureF</td>
+                            <td>@forecast.Summary</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </Authorized>
+    <!--Show this section if the yser is not logged in-->
+    <NotAuthorized>
+        <p>Yor are not signed in.</p>
+    </NotAuthorized>
+
+</AuthorizeView>
 
 @code {
-    WeatherForecast[] forecasts;
+    //AuthenticationState is available as a CascadingParameter
+    [CascadingParameter]
+    private Task<AuthenticationState>  AuthenticationStateTask { get; set; }
+
+    List<WeatherForecast> forecasts;
+          
 
     protected override async Task OnInitializedAsync()
     {
-        forecasts = await ForecastService.GetForecastAsync(DateTime.Now);
+        //Get the current user
+        var user = (await AuthenticationStateTask).User;
+        //Get the forescasts for the current user
+
+        forecasts = await ForescastService.GetForecastAsync(user.Identity.Name);
     }
 }

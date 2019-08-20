@@ -1,10 +1,11 @@
 ﻿using System;
 using System.IO;
+using EndToEndBlazor.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Configuration;
 
-namespace EndToEndBlazorDB.Data.EndToEndaBlazor
+namespace EndToEndBlazorDB.Data
 {
     public partial class EndtoendblazorContext : DbContext
     {
@@ -25,7 +26,7 @@ namespace EndToEndBlazorDB.Data.EndToEndaBlazor
             {
                 var configuration = new ConfigurationBuilder()
                     .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("appsetting.json")
+                    .AddJsonFile("appsettings.json")
                     .Build();
 
                 optionsBuilder.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));

@@ -1,4 +1,4 @@
-using EndToEndBlazorDB.Data.EndToEndaBlazor;
+using EndToEndBlazorDB.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,10 +14,14 @@ namespace EndToEndBlazor.Data
             //Get Waeter Forescasts
             using (var context = new EndtoendblazorContext())
             {
-                colWeaterForescast = (from WeatherForecast in context.WeatherForecast
-                                      //Only get entris for the current logged in user
-                                      where WeatherForecast.UserName.Equals(strCurrentUser)
-                                      select WeatherForecast).ToList();
+                colWeaterForescast = (from weatherForecast in context.WeatherForecast
+
+                                          // only get entries for the current logged in user
+
+                                      where weatherForecast.UserName == strCurrentUser
+
+                                      select weatherForecast).ToList();
+
             }
 
 

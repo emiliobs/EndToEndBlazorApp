@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace EndToEndBlazorDB.Data.EndToEndaBlazor
+namespace EndToEndBlazor.Data
 {
-    public partial class WeatherForecast
+    public class WeatherForecast
     {
         public int Id { get; set; }
         public DateTime? Date { get; set; }
@@ -11,5 +13,6 @@ namespace EndToEndBlazorDB.Data.EndToEndaBlazor
         public int? TemperatureF { get; set; }
         public string Summary { get; set; }
         public string UserName { get; set; }
+
     }
 }
