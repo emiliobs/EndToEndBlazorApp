@@ -57,13 +57,36 @@ namespace EndToEndBlazor.Data
                 }
                 else
                 {
-                    return Task.FromResult(true);
+                    return Task.FromResult(false);
                 }
 
 
                 return Task.FromResult(true);
 
             }
+
+           
+        }
+
+        public Task<bool> DeleteForescastAsync(int id)
+        {
+            using (var context = new EndtoendblazorContext())
+            {
+                var deleteForescast = context.WeatherForecast.Where(w => w.Id.Equals(id)).FirstOrDefault();
+
+                if (deleteForescast != null)
+                {
+                    context.WeatherForecast.Remove(deleteForescast);
+
+                    context.SaveChanges();
+                }
+                else
+                {
+                    return Task.FromResult(false);
+                }
+            }
+
+            return Task.FromResult(true);
         }
 
     }

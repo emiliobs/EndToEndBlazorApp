@@ -2,6 +2,7 @@
 @using EndToEndBlazor.Data
 @inject WeatherForecastService  ForescastService
 @inject AuthenticationStateProvider  AuthenticationStateProvider
+@inject IJSRuntime JS;
 
 
 @inject WeatherForecastService ForecastService
@@ -46,7 +47,10 @@
                             <td>@forecast.Summary</td>
                             <td>
                                 <button class="btn btn-info" @onclick="@(()=> EditForescast(forecast))">Edit</button> |
-                                <button class="btn btn-danger">Delete</button>
+                               
+                                    <button class="btn btn-danger" @onclick="@(()=> DeleteForescast(forecast.Id))">Delete</button>
+
+                               
                             </td>
                         </tr>
                     }
@@ -178,5 +182,27 @@
 
         //open the Poppup
         ShowPopup = true;
+    }
+
+    async  Task DeleteForescast(int id)
+    {
+        //Close the popup:
+        ShowPopup = false;
+
+        //Get the current user:
+        var user = (await AuthenticationStateTask).User;
+
+        var mensaje = $"Do you want delete this User {user.Identity.Name}  with  all your data";
+
+        if ( await JS.InvokeAsync<bool>("confirm",mensaje))
+        {
+          var result = ForescastService.DeleteForescastAsync(id);
+
+        }
+
+        //Dekete the forescast
+
+        //Get the forescast for the curret user:
+        forecasts = await ForecastService.GetForecastAsync(user.Identity.Name);
     }
 }
