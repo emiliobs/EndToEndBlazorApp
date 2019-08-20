@@ -45,7 +45,7 @@
                             <td>@forecast.TemperatureF</td> 
                             <td>@forecast.Summary</td>
                             <td>
-                                <button class="btn btn-info">Edit</button> |
+                                <button class="btn btn-info" @onclick="@(()=> EditForescast(forecast))">Edit</button> |
                                 <button class="btn btn-danger">Delete</button>
                             </td>
                         </tr>
@@ -74,7 +74,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3 class="modal-title">Edit Forescast.</h3>
+                    <h3 class="modal-title">@Title</h3>
                     <!--Button to close the popup-->
                     <button type="button" class="close" @onclick="@ClosePopup">
                         <span aria-hidden="true">X</span>
@@ -96,12 +96,13 @@
 
 @code {
 
-    
+
     WeatherForecast weatherForecast = new WeatherForecast();
     //AuthenticationState is available as a CascadingParameter
     [CascadingParameter]
     private Task<AuthenticationState> AuthenticationStateTask { get; set; }
     List<WeatherForecast> forecasts;
+    public string Title { get; set; }
 
     bool ShowPopup = false;
 
@@ -124,6 +125,8 @@
 
     void AddNewForescast()
     {
+
+        Title = "New Forescast.";
         //Make ew forescast:
         weatherForecast = new WeatherForecast();
         //set id to 0 so we know it is a new record:
@@ -142,7 +145,7 @@
         //A new forescast will have the Id set yo  0
         if (weatherForecast.Id == 0)
         {
-        
+
             WeatherForecast newWeatherForecast = new WeatherForecast();
 
             //Create new forescast:
@@ -159,9 +162,21 @@
         else
         {
             //This update:
+            var result = ForecastService.UpdateForescastAsync(weatherForecast);
         }
 
         forecasts = await ForescastService.GetForecastAsync(user.Identity.Name);
 
+    }
+
+    void  EditForescast(WeatherForecast model)
+    {
+        Title = "Edit Forescast.";
+
+        //Set the selected forescast as the curret forescasdt:
+        weatherForecast = model;
+
+        //open the Poppup
+        ShowPopup = true;
     }
 }
