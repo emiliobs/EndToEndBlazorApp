@@ -1,4 +1,6 @@
+using EndToEndBlazorDB.Data.EndToEndaBlazor;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -6,20 +8,22 @@ namespace EndToEndBlazor.Data
 {
     public class WeatherForecastService
     {
-        private static readonly string[] Summaries = new[]
+        public Task<List<WeatherForecast>> GetForecastAsync(string strCurrentUser)
         {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
-
-        public Task<WeatherForecast[]> GetForecastAsync(DateTime startDate)
-        {
-            var rng = new Random();
-            return Task.FromResult(Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            List<WeatherForecast> colWeaterForescast = new List<WeatherForecast>();
+            //Get Waeter Forescasts
+            using (var context = new EndtoendblazorContext())
             {
-                Date = startDate.AddDays(index),
-                TemperatureC = rng.Next(-20, 55),
-                Summary = Summaries[rng.Next(Summaries.Length)]
-            }).ToArray());
+                colWeaterForescast = (from WeatherForecast in context.WeatherForecast
+                                      //Only get entris for the current logged in user
+                                      where WeatherForecast.UserName.Equals(strCurrentUser)
+                                      select WeatherForecast).ToList();
+            }
+
+
+            return Task.FromResult(colWeaterForescast);
+
         }
+
     }
 }
